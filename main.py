@@ -1,5 +1,6 @@
 import telebot
 import os
+from Regions import *
 import requests
 from telebot.types import (
     InlineKeyboardButton, ReplyKeyboardMarkup,
@@ -12,53 +13,45 @@ data = {}
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    text = f"Assalomu alaykum kompaniyamizga hush kelibsiz"
-    reply_markup = InlineKeyboardMarkup(
-        row_width=1)
-    reply_markup.add(
-        InlineKeyboardButton(text="Registrasiyadan otish", callback_data="reg_user")
-    )
+    text = f"Assalomu alaykum kompaniyamizga hush kelibsiz\n"
+    text += "Viloyatingizni kiriting"
+    data['step'] = 'region'
+    bot.send_message(message.from_user.id, text, reply_markup=Region())
 
-    bot.send_message(message.from_user.id, text, reply_markup=reply_markup)
-
-@bot.callback_query_handler(func=lambda c: True)
-def callback_message(callback):
-    if callback.data == 'reg_user':
-        text = 'Korxonangiz nomini kiriting !'
-        data['step'] = 'region'
-        bot.send_message(callback.from_user.id, text)
+# @bot.callback_query_handler(func=lambda c: True)
+# def callback_message(callback):
+#     if callback.data == 'reg_user':
+#         text = 'Korxonangiz nomini kiriting !'
+#         data['step'] = 'region'
+#         bot.send_message(callback.from_user.id, text)
 
 @bot.message_handler(func=lambda m: True)
 def text_messsage(message):
     user_step = data.get('step')
-    if user_step == 'region':
-        data['company_name'] = message.text
-        data['step'] = 'adres'
-        text = f"Korxona nomi:{data.get('company_name')}\n\n"
-        text += 'Qaysi hududda faoliyat olib borasiz'
-        reply_markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        reply_markup.add(*[
-            KeyboardButton(text='Buxoro'),
-            KeyboardButton(text='Navoiy'),
-            KeyboardButton(text='Qarshi')
-        ])
+    if message.text == 'Buxoro' and user_step == 'region':
+        text="Tumaningiz nomini kiriting ! "
+        data['step'] = 'company_name'
+        bot.send_message(message.from_user.id,text, reply_markup=Buxoro_region())
 
-        bot.send_message(message.from_user.id, text, reply_markup=reply_markup)
+    elif message.text == 'Navoiy' and user_step == 'region':
+        text = "Tumaningiz nomini kiriting ! "
+        data['step'] = 'company_name'
+        bot.send_message(message.from_user.id, text,reply_markup=Navoiy_region())
 
-    elif user_step == 'adres':
+    elif message.text == 'Qarshi' and user_step == 'region':
+        text = "Tumaningiz nomini kiriting ! "
+        data['step'] = 'company_name'
+        bot.send_message(message.from_user.id, text, reply_markup=Qashqadaryo_region())
+
+    elif user_step == 'company_name':
         data['region'] = message.text
-        data['step'] = 'orientor'
-        text = "Manzilizni kiriting, iltimos"
-        bot.send_message(message.from_user.id, text)
-
-    elif user_step == 'orientor':
-        data['adres'] = message.text
         data['step'] = 'phone'
-        text = "Manzilingiz joylashgan mo'ljalingizni kiriting"
-        bot.send_message(message.from_user.id, text)
+        text = "Korxonangiz nomini kiriting "
+        bot.send_message(message.from_user.id, text,reply_markup=ReplyKeyboardRemove())
+
 
     elif user_step == 'phone':
-        data['orientor'] = message.text
+        data['company_name'] = message.text
         data['step'] = 'phone2'
         text = "Telefon nomerizni kiriting!"
         bot.send_message(message.from_user.id, text)
@@ -67,12 +60,12 @@ def text_messsage(message):
     elif user_step == 'phone2':
         data['phone'] = message.text
         data['step'] = 'end'
-        text = "Qushimch telefon raqamingizni kiriting"
+        text = "Qushimcha telefon raqamingizni kiriting"
         bot.send_message(message.from_user.id, text)
 
     elif user_step == 'end':
         data['phone2'] = message.text
-        text = f"hayr sog buling\n\n{data}"
+        text = f"Hayr sog buling\n\n{data}"
         bot.send_message(message.from_user.id, text)
 
 

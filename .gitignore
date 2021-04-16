@@ -1,0 +1,17 @@
+__pycache__
+__pycache__/
+/__pycache__
+*.py[cod]
+*$py.class
+*__pycache__*
+
+/linux_venv
+/venv
+*/venv
+/.idea
+*.pyc
+passenger_wsgi.py
+tmp/
+venv2
+.env
+.idea
